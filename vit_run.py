@@ -2,6 +2,7 @@ import imp
 from urllib.request import urlretrieve
 import os
 import numpy as np
+import time
 import torch
 from torch import nn, optim
 from models.modeling import VisionTransformer, CONFIGS
@@ -15,6 +16,8 @@ def fine_tune(encoder, classifier, train_dataloader, val_dataloader, n_epochs, l
   optimizer_encoder = optim.Adam(encoder.parameters(), lr=lr, betas=(0.5, 0.9))
   optimizer_classifier = optim.Adam(classifier.parameters(), lr=lr, betas=(0.5, 0.9))
   criterion = nn.CrossEntropyLoss()
+
+  start_time = time.time()
 
   att_weights = list()
 
@@ -51,11 +54,16 @@ def fine_tune(encoder, classifier, train_dataloader, val_dataloader, n_epochs, l
         loss = criterion(logits.squeeze(-1).to(device), tgt)
         val_loss += loss.item()
     
-    print('Epoch: {}/{} Val loss: {:.5f}'.format(epoch + 1, n_epochs, val_loss / len(val_dataloader)))
+    print('Epoch: {}/{}, Val loss: {:.5f}, elpase: {:.3f}s'.format(epoch + 1, n_epochs, val_loss / len(val_dataloader), time.time() - start_time))
     torch.save(encoder.state_dict(), './model_output/encoder_{}.pt'.format(epoch + 1))
     torch.save(classifier.state_dict(), './model_output/classifier_{}.pt'.format(epoch + 1))
+
+
+  print(f'att_weights len: {len(att_weights)}')
+  for item in att_weights:
+    print(f'    item size: {item.size()}')
   
-  print(f'attn_weight shape: {np.array(att_weights).shape}')
+  
   return encoder, classifier
 
 
