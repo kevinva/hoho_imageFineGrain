@@ -8,6 +8,8 @@ from PIL import Image
 
 from configs import *
 
+
+
 def make_data(root_dir_path):
     root_dir = root_dir_path
     train_info = {}
@@ -67,26 +69,3 @@ class CubDataset(Dataset):
     return image, torch.tensor(target, dtype=torch.float32)
     
 
-transform = {
-    'train': transforms.Compose([transforms.Resize((224, 224)),
-                                 transforms.RandomHorizontalFlip(),
-                                 transforms.RandomRotation(50),
-                                 transforms.ToTensor()
-                                 ]),
-    
-    'valid': transforms.Compose([transforms.Resize((224, 224)),
-                                 transforms.RandomHorizontalFlip(),
-                                 transforms.ToTensor()
-                                 ])
-}
-
-
-class2idx, train_info, test_info, val_info = make_data(IMAGE_DIR)
-
-train_dataset = CubDataset(train_info, class2idx, transform=transform['train'])
-val_dataset = CubDataset(test_info, class2idx, transform=transform['valid'])
-test_dataset = CubDataset(val_info, class2idx, transform=transform['valid'])
-
-train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
-val_dataloader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=True)
-test_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True)
