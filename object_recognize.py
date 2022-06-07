@@ -47,7 +47,7 @@ class ObjectFinder():
 
         att_last_layer = joint_attentions[-1]  # [197, 197]
         att_CLS = att_last_layer[0, 1:]        # [196]， 第一行就是CLS token对应于各个token的attention权重，取“1:”就是与其他token的attention权重
-        att_CLS = att_CLS.reshape(grid_size, grid_size).cpu().detach().numpy() # [14, 14]
+        att_CLS = att_CLS.reshape(grid_size, grid_size).detach().numpy() # [14, 14]
         att_CLS = att_CLS / att_CLS.max()  # normalize
 
         print(f'grid size: {grid_size}')
