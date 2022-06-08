@@ -89,11 +89,11 @@ if __name__ == '__main__':
     model = VisionTransformer(config, num_classes=1000, zero_head=False, img_size=224, vis=True)
     model.load_from(np.load('model_checkpoints/ViT-B_16-224.npz'))
 
-    encoder = nn.Sequential(model.transformer.embeddings,
-                            model.transformer.encoder)
-    ViT_embed_dim = 768
+    encoder = nn.Sequential(model.transformer.embeddings, model.transformer.encoder)
+
+    viT_embed_dim = 768
     n_classes = len(class2idx)
-    classifier = nn.Linear(ViT_embed_dim, n_classes)
+    classifier = nn.Linear(viT_embed_dim, n_classes)
 
     if os.path.exists('model_output/encoder_1.pt'):
         encoder.load_state_dict(torch.load('model_output/encoder_1.pt'))
