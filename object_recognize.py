@@ -148,32 +148,33 @@ if __name__ == '__main__':
     n_classes = 200
     classifier = nn.Linear(ViT_embed_dim, n_classes)
 
-    if os.path.exists('model_output/encoder_1.pt'):
-        encoder.load_state_dict(torch.load('model_output/encoder_1.pt'))
-    if os.path.exists('model_output/classifier_1.pt'):
-        classifier.load_state_dict(torch.load('model_output/classifier_1.pt'))
+    if os.path.exists('model_output/transfg_encoder_20.pt'):
+        encoder.load_state_dict(torch.load('model_output/transfg_encoder_20.pt'))
+    if os.path.exists('model_output/transfg_classifier_20.pt'):
+        classifier.load_state_dict(torch.load('model_output/transfg_classifier_20.pt'))
 
     # image_path = '../data/cub_200_2011/CUB_200_2011/images/001.Black_footed_Albatross/Black_Footed_Albatross_0003_796136.jpg'
-    image_path = '../data/cub_200_2011/CUB_200_2011/images/006.Least_Auklet/Least_Auklet_0030_795116.jpg'
+    # image_path = '../data/cub_200_2011/CUB_200_2011/images/006.Least_Auklet/Least_Auklet_0030_795116.jpg'
+    image_path = '../data/cub_200_2011/CUB_200_2011/images/113.Baird_Sparrow/Baird_Sparrow_0032_794553.jpg'
     image_path1 = '../data/cub_200_2011/CUB_200_2011/images/032.Mangrove_Cuckoo/Mangrove_Cuckoo_0011_26406.jpg'
 
-    # finder = ObjectFinder(encoder, classifier, image_transform=TRANSFORM_VALID)
-    # _, prob, _ = finder.mask_image(img_path=image_path, plot=True)
+    finder = ObjectFinder(encoder, classifier, image_transform=TRANSFORM_VALID)
+    _, prob, _ = finder.mask_image(img_path=image_path1, plot=True)
 
 
-    im = Image.open(image_path).convert('RGB')
-    transform = TRANSFORM_VALID
-    im_x = transform(im)            # [1, 3, 224, 224]， patch size: [16, 16]
+    # im = Image.open(image_path).convert('RGB')
+    # transform = TRANSFORM_VALID
+    # im_x = transform(im)            # [1, 3, 224, 224]， patch size: [16, 16]
 
-    im1 = Image.open(image_path1).convert('RGB')
-    im_x1 = transform(im1)           # [1, 3, 224, 224]， patch size: [16, 16]
-    batch_x = torch.stack((im_x, im_x1))
-    print(f'batch size: {batch_x.size()}')
+    # im1 = Image.open(image_path1).convert('RGB')
+    # im_x1 = transform(im1)           # [1, 3, 224, 224]， patch size: [16, 16]
+    # batch_x = torch.stack((im_x, im_x1))
+    # print(f'batch size: {batch_x.size()}')
 
     # print(f'image tensor size: {im_x.size()}')
     # print(f'image shape: {np.array(im).shape}')
 
-    features, att_mat = encoder(batch_x)            
+    # features, att_mat = encoder(batch_x)            
     # att_mat = torch.stack(att_mat).squeeze(1)    # [12 (layers), 12 (heads), 197, 197]
     # att_mat = torch.mean(att_mat, dim=1)         # [12, 197, 197]
     # residual_att = torch.eye(att_mat.size(1))    # [197, 197]
@@ -193,39 +194,39 @@ if __name__ == '__main__':
 
     # print(features.size(), aug_att_mat.size())
 
-    print(f'feature size: {features.size()}')
-    print(f'att mat size: {att_mat[0].size()}')
+    # print(f'feature size: {features.size()}')
+    # print(f'att mat size: {att_mat[0].size()}')
 
-     # att_mat为 12(层) x [batch_size, 12(head), 197, 197]
-    joint_att_mat = att_mat[0]   # [batch_size, 12(head_size), 197, 197]
-    for n in range(1, len(att_mat)):
-        joint_att_mat = torch.matmul(att_mat[n], joint_att_mat)
+    #  # att_mat为 12(层) x [batch_size, 12(head), 197, 197]
+    # joint_att_mat = att_mat[0]   # [batch_size, 12(head_size), 197, 197]
+    # for n in range(1, len(att_mat)):
+    #     joint_att_mat = torch.matmul(att_mat[n], joint_att_mat)
 
-    print(joint_att_mat.size())
-    joint_att_mat = joint_att_mat[:, :, 0, 1:]  # [batch_size, head_size, 196]，找CLS token attent到其他token的注意力
-    print(joint_att_mat.size())
-    print(joint_att_mat.max(2)[1])
+    # print(joint_att_mat.size())
+    # joint_att_mat = joint_att_mat[:, :, 0, 1:]  # [batch_size, head_size, 196]，找CLS token attent到其他token的注意力
+    # print(joint_att_mat.size())
+    # print(joint_att_mat.max(2)[1])
 
-    att_index = joint_att_mat.max(2)[1] + 1
-    parts = []
-    for batch in range(att_index.shape[0]):
-        parts.append(features[batch, att_index[batch, :], :])
-    parts = torch.stack(parts).squeeze(1)
-    print(f'parts size: {parts.size()}')
-    print(f'cls feature: {features[:, 0].unsqueeze(1).size()}')
-    concat = torch.cat((features[:, 0].unsqueeze(1), parts), dim=1)
-    print(f'concat: {concat.size()}')
-    print(f'cls_embedding: {concat[:, 0].size()}')
+    # att_index = joint_att_mat.max(2)[1] + 1
+    # parts = []
+    # for batch in range(att_index.shape[0]):
+    #     parts.append(features[batch, att_index[batch, :], :])
+    # parts = torch.stack(parts).squeeze(1)
+    # print(f'parts size: {parts.size()}')
+    # print(f'cls feature: {features[:, 0].unsqueeze(1).size()}')
+    # concat = torch.cat((features[:, 0].unsqueeze(1), parts), dim=1)
+    # print(f'concat: {concat.size()}')
+    # print(f'cls_embedding: {concat[:, 0].size()}')
 
-    features = concat[:, 0]
+    # features = concat[:, 0]
 
-    B, _ = features.shape
-    features = F.normalize(features)
-    cos_matrix = features.mm(features.t())
-    print(cos_matrix)
-    targets = torch.tensor([[1, 0, 0], [1, 0, 0]])
-    pos_label_matrix = targets.mm(targets.t())
-    neg_label_matrix = 1 - pos_label_matrix
-    pos_cos_matrix = 1 - cos_matrix
-    print(pos_label_matrix)
-    print((pos_cos_matrix * pos_label_matrix).sum())
+    # B, _ = features.shape
+    # features = F.normalize(features)
+    # cos_matrix = features.mm(features.t())
+    # print(cos_matrix)
+    # targets = torch.tensor([[1, 0, 0], [1, 0, 0]])
+    # pos_label_matrix = targets.mm(targets.t())
+    # neg_label_matrix = 1 - pos_label_matrix
+    # pos_cos_matrix = 1 - cos_matrix
+    # print(pos_label_matrix)
+    # print((pos_cos_matrix * pos_label_matrix).sum())
